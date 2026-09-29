@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI商业实战与落地体系 - 杭州三天研修PPT复刻</title>
+  <style>
+    :root {
+      --primary-red: #e02424;
+      --primary-blue: #2563eb;
+      --accent-orange: #f97316;
+      --bg-dark: #0f1117;
+      --card-dark: #1a1d26;
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-white: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #06070a;
+      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Fluid Full-Screen Presentation Stage */
+    #deck-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: scale(0.985);
+      display: flex;
+      flex-direction: column;
+      padding: clamp(16px, 3vh, 45px) clamp(20px, 4vw, 65px);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      z-index: 10;
+    }
+
+    /* Slide 0: Cover Slide */
+    .slide-cover {
+      background: radial-gradient(circle at 80% 20%, #2a1124 0%, #0d0f17 60%, #06070a 100%);
+      color: #ffffff;
+      justify-content: center;
+      align-items: flex-start;
+      padding: clamp(30px, 6vh, 90px) clamp(30px, 7vw, 120px);
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(224, 36, 36, 0.15);
+      border: 1px solid rgba(224, 36, 36, 0.4);
+      color: #ff6b6b;
+      padding: clamp(5px, 0.8vh, 8px) clamp(12px, 1.2vw, 20px);
+      border-radius: 30px;
+      font-size: clamp(13px, 1.5vh, 18px);
+      font-weight: 600;
+      margin-bottom: clamp(14px, 2.5vh, 30px);
+      letter-spacing: 1px;
+    }
+
+    .cover-title {
+      font-size: clamp(34px, 5.2vw, 74px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: clamp(12px, 2vh, 22px);
+      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-highlight {
+      color: #ff4d4f;
+      -webkit-text-fill-color: #ff4d4f;
+    }
+
+    .cover-quote {
+      font-size: clamp(18px, 2.2vw, 32px);
+      color: #e2e8f0;
+      border-left: 5px solid #e02424;
+      padding-left: clamp(14px, 1.5vw, 25px);
+      margin: clamp(14px, 2.2vh, 28px) 0 clamp(20px, 3.5vh, 42px) 0;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .cover-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(20px, 3vw, 50px);
+      margin-top: clamp(10px, 1.5vh, 20px);
+      font-size: clamp(13px, 1.5vh, 18px);
+      color: #94a3b8;
+    }
+
+    .cover-footer-item span {
+      color: #ffffff;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    /* Slide 1: 企业全岗位 AI 作战地图 (Photo 1) */
+    .slide-map {
+      background: #f8fafc;
+      padding: clamp(14px, 2.5vh, 32px) clamp(16px, 3vw, 50px);
+    }
+
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: clamp(6px, 1vh, 12px);
+      margin-bottom: clamp(8px, 1.5vh, 18px);
+      flex-shrink: 0;
+    }
+
+    .header-left .en-title {
+      font-size: clamp(10px, 1.1vh, 13px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .header-left .cn-title {
+      font-size: clamp(22px, 3vh, 38px);
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .header-right {
+      font-size: clamp(11px, 1.3vh, 15px);
+      color: #64748b;
+      background: #edf2f7;
+      padding: clamp(4px, 0.7vh, 7px) clamp(10px, 1vw, 16px);
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr minmax(230px, 290px) 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: clamp(8px, 1.2vh, 15px);
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .role-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: clamp(8px, 1.2vh, 12px);
+      padding: clamp(8px, 1.2vh, 14px) clamp(10px, 1vw, 15px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .role-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(3px, 0.6vh, 8px);
+      flex-shrink: 0;
+    }
+
+    .role-name {
+      font-size: clamp(15px, 1.9vh, 21px);
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    .role-tag {
+      font-size: clamp(10px, 1.1vh, 12px);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .tag-content { background: #eff6ff; color: #2563eb; }
+    .tag-growth { background: #fef2f2; color: #dc2626; }
+    .tag-sales { background: #f0fdf4; color: #16a34a; }
+    .tag-ops { background: #f5f3ff; color: #7c3aed; }
+
+    .role-badge-sub {
+      font-size: clamp(10px, 1.1vh, 12px);
+      color: #94a3b8;
+      margin-bottom: clamp(2px, 0.5vh, 5px);
+      flex-shrink: 0;
+    }
+
+    .role-features {
+      list-style: none;
+      margin-bottom: clamp(4px, 0.8vh, 10px);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      min-height: 0;
+    }
+
+    .role-features li {
+      font-size: clamp(11px, 1.25vh, 13.5px);
+      color: #475569;
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .role-features li::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      background: #3b82f6;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .role-flow {
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: clamp(3px, 0.6vh, 6px) clamp(5px, 0.7vw, 8px);
+      justify-content: space-between;
+      font-size: clamp(9.5px, 1.1vh, 11.5px);
+      font-weight: 600;
+      color: #334155;
+      flex-shrink: 0;
+    }
+
+    .flow-step {
+      background: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .flow-arrow {
+      color: #94a3b8;
+      font-size: 10px;
+    }
+
+    /* Central AI Hub Card */
+    .hub-column {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      background: #111318;
+      border-radius: clamp(12px, 1.8vh, 20px);
+      border: 2px solid #2d3342;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(12px, 1.8vh, 22px) clamp(10px, 1.1vw, 16px);
+      color: #ffffff;
+      box-shadow: 0 10px 40px rgba(220, 38, 38, 0.15);
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .hub-badge {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: clamp(9.5px, 1.1vh, 11.5px);
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: clamp(6px, 1vh, 12px);
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .hub-circle-logo {
+      width: clamp(44px, 6vh, 68px);
+      height: clamp(44px, 6vh, 68px);
+      background: radial-gradient(circle, #ff4d4f 0%, #b91c1c 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 2.5vh, 26px);
+      font-weight: 900;
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+      margin-bottom: clamp(4px, 0.8vh, 10px);
+      flex-shrink: 0;
+    }
+
+    .hub-title {
+      font-size: clamp(16px, 2vh, 22px);
+      font-weight: 800;
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+
+    .hub-sub {
+      font-size: clamp(9.5px, 1.1vh, 11.5px);
+      color: #94a3b8;
+      margin-bottom: clamp(8px, 1.2vh, 14px);
+      flex-shrink: 0;
+    }
+
+    .hub-modules {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(5px, 0.8vh, 8px);
+      flex-grow: 1;
+      justify-content: space-evenly;
+      min-height: 0;
+    }
+
+    .hub-item {
+      background: #1c212c;
+      border: 1px solid #2e3648;
+      border-radius: 7px;
+      padding: clamp(5px, 0.9vh, 9px) clamp(7px, 0.9vw, 11px);
+    }
+
+    .hub-item-name {
+      color: #ff4d4f;
+      font-size: clamp(10.5px, 1.2vh, 13px);
+      font-weight: 700;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .hub-item-desc {
+      font-size: clamp(9.5px, 1.05vh, 11.5px);
+      color: #cbd5e1;
+    }
+
+    .hub-footer-notice {
+      margin-top: clamp(6px, 0.8vh, 10px);
+      font-size: clamp(9.5px, 1.05vh, 11.5px);
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1.35;
+      border-top: 1px solid #2d3342;
+      padding-top: clamp(5px, 0.8vh, 8px);
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* Slide 2: AI员工公式 (Photo 2) */
+    .slide-formula {
+      background: #ffffff;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: clamp(20px, 4vh, 60px) clamp(20px, 5vw, 80px);
+    }
+
+    .formula-logo-bar {
+      position: absolute;
+      top: clamp(16px, 2.5vh, 40px);
+      left: clamp(20px, 3.5vw, 55px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .formula-logo-icon {
+      width: clamp(28px, 3.5vh, 36px);
+      height: clamp(28px, 3.5vh, 36px);
+      background: #2563eb;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: clamp(14px, 1.8vh, 18px);
+    }
+
+    .formula-logo-text {
+      font-size: clamp(16px, 2vh, 20px);
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    .formula-main-equation {
+      font-size: clamp(32px, 5vw, 74px);
+      font-weight: 900;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: clamp(12px, 2vw, 26px);
+      margin-bottom: clamp(16px, 3.5vh, 45px);
+      margin-top: clamp(10px, 2vh, 25px);
+    }
+
+    .formula-red {
+      color: #e02424;
+      position: relative;
+    }
+
+    .formula-columns {
+      display: flex;
+      gap: clamp(24px, 4vw, 70px);
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1200px;
+      justify-content: center;
+    }
+
+    .formula-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 480px;
+    }
+
+    .down-arrow-svg {
+      width: clamp(32px, 4vh, 48px);
+      height: clamp(42px, 5.5vh, 62px);
+      fill: #2563eb;
+      margin-bottom: clamp(10px, 1.8vh, 18px);
+      animation: bounce 2s infinite ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    .formula-card-box {
+      width: 100%;
+      background: #2563eb;
+      color: #ffffff;
+      border-radius: clamp(10px, 1.5vh, 16px);
+      padding: clamp(18px, 3vh, 34px) clamp(14px, 1.8vw, 28px);
+      font-size: clamp(15px, 2vh, 24px);
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: 0 16px 36px rgba(37, 99, 235, 0.28);
+    }
+
+    .formula-banner-bottom {
+      margin-top: clamp(20px, 4vh, 50px);
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: clamp(10px, 1.5vh, 16px) clamp(16px, 2vw, 36px);
+      border-radius: 12px;
+      font-size: clamp(12px, 1.5vh, 18px);
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 1050px;
+    }
+
+    .formula-rainbow-bar {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: clamp(240px, 30vw, 450px);
+      height: 10px;
+      background: linear-gradient(90deg, #60a5fa, #ec4899, #f59e0b, #10b981);
+      border-top-left-radius: 8px;
+    }
+
+    /* Slide 3: 创造者基建与模型网关 (Photo 3) */
+    .slide-gateway {
+      background: #090a0f;
+      color: #ffffff;
+      padding: clamp(16px, 3vh, 40px) clamp(20px, 3.5vw, 60px);
+    }
+
+    .gateway-top-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #64748b;
+      font-size: clamp(11px, 1.2vh, 14px);
+      letter-spacing: 2px;
+      margin-bottom: clamp(4px, 0.8vh, 8px);
+      flex-shrink: 0;
+    }
+
+    .gateway-headline {
+      font-size: clamp(24px, 3.2vw, 44px);
+      font-weight: 800;
+      margin-bottom: clamp(4px, 0.8vh, 10px);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .gateway-sub {
+      font-size: clamp(12px, 1.5vh, 18px);
+      color: #94a3b8;
+      margin-bottom: clamp(12px, 1.8vh, 24px);
+      flex-shrink: 0;
+    }
+
+    .gateway-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: clamp(14px, 2vw, 32px);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .terminal-card {
+      background: #141721;
+      border: 1px solid #272d3d;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      min-height: 0;
+    }
+
+    .terminal-bar {
+      background: #1c202e;
+      padding: clamp(8px, 1.2vh, 12px) clamp(12px, 1.2vw, 18px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #272d3d;
+      flex-shrink: 0;
+    }
+
+    .term-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .term-title {
+      color: #94a3b8;
+      font-size: clamp(10.5px, 1.1vh, 12.5px);
+      margin-left: 8px;
+      font-family: monospace;
+    }
+
+    .terminal-body {
+      padding: clamp(12px, 1.8vh, 22px);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(11.5px, 1.35vh, 14.5px);
+      line-height: 1.6;
+      color: #e2e8f0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .code-dim { color: #64748b; }
+    .code-cmd { color: #38bdf8; font-weight: bold; }
+    .code-flag { color: #f472b6; }
+    .code-str { color: #4ade80; }
+    .code-key { color: #fbbf24; }
+
+    .terminal-status-bar {
+      background: #0f121b;
+      padding: clamp(10px, 1.3vh, 14px) clamp(14px, 1.5vw, 22px);
+      border-top: 1px solid #272d3d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: clamp(11px, 1.2vh, 13px);
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .gateway-side-cards {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.4vh, 18px);
+      justify-content: space-evenly;
+      min-height: 0;
+    }
+
+    .app-showcase-box {
+      background: #141721;
+      border: 1px solid #272d3d;
+      border-radius: 12px;
+      padding: clamp(12px, 1.8vh, 20px) clamp(14px, 1.5vw, 22px);
+    }
+
+    .app-showcase-title {
+      font-size: clamp(14px, 1.8vh, 18px);
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f8fafc;
+    }
+
+    .app-showcase-desc {
+      font-size: clamp(11.5px, 1.3vh, 14px);
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .app-tag {
+      font-size: clamp(10px, 1.1vh, 11px);
+      padding: 2px 6px;
+      background: #1e293b;
+      color: #38bdf8;
+      border-radius: 4px;
+    }
+
+    /* Slide 4: 工具不同，底层逻辑相同 (Photo 4) */
+    .slide-tools {
+      background: #101217;
+      color: #ffffff;
+      padding: clamp(16px, 3vh, 40px) clamp(20px, 3.5vw, 60px);
+    }
+
+    .tools-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: clamp(12px, 1.8vh, 22px);
+      flex-shrink: 0;
+    }
+
+    .tools-title-group .main-t {
+      font-size: clamp(22px, 3.2vw, 42px);
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .tools-title-group .sub-t {
+      font-size: clamp(12px, 1.4vh, 17px);
+      color: #94a3b8;
+    }
+
+    .tools-alert-tag {
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      color: #fb923c;
+      padding: clamp(5px, 0.8vh, 8px) clamp(10px, 1vw, 16px);
+      border-radius: 30px;
+      font-size: clamp(11.5px, 1.3vh, 15px);
+      font-weight: 600;
+    }
+
+    .tools-comparison-layout {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.6vh, 20px);
+      flex: 1;
+      min-height: 0;
+      justify-content: space-evenly;
+    }
+
+    .tools-section {
+      background: #171a22;
+      border: 1px solid #282f40;
+      border-radius: clamp(10px, 1.4vh, 15px);
+      padding: clamp(10px, 1.4vh, 16px) clamp(14px, 1.5vw, 24px);
+    }
+
+    .tools-section-title {
+      font-size: clamp(11px, 1.2vh, 14px);
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: clamp(6px, 1vh, 12px);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tools-row {
+      display: flex;
+      gap: clamp(10px, 1.4vw, 20px);
+    }
+
+    .tool-item-card {
+      flex: 1;
+      background: #1f2430;
+      border: 1px solid #333d52;
+      border-radius: 11px;
+      padding: clamp(8px, 1.2vh, 14px) clamp(10px, 1.1vw, 16px);
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 1vw, 14px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .tool-icon-wrap {
+      width: clamp(38px, 4.8vh, 48px);
+      height: clamp(38px, 4.8vh, 48px);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .tool-icon-wrap.multi-logo {
+      width: auto;
+      min-width: clamp(56px, 6vw, 68px);
+      padding: 0 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tool-info-name {
+      font-size: clamp(14px, 1.7vh, 19px);
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+
+    .tool-info-role {
+      font-size: clamp(10.5px, 1.15vh, 12.5px);
+      color: #94a3b8;
+    }
+
+    /* Common Underlying Logic Banner */
+    .logic-flow-box {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      border: 2px solid #4338ca;
+      border-radius: clamp(10px, 1.5vh, 16px);
+      padding: clamp(10px, 1.5vh, 18px) clamp(16px, 1.8vw, 28px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 12px 35px rgba(67, 56, 202, 0.25);
+    }
+
+    .logic-label {
+      font-size: clamp(15px, 1.9vh, 21px);
+      font-weight: 800;
+      color: #c7d2fe;
+    }
+
+    .logic-steps {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 1.4vw, 20px);
+    }
+
+    .step-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: clamp(6px, 1vh, 11px) clamp(10px, 1.2vw, 18px);
+      border-radius: 9px;
+      font-size: clamp(12px, 1.5vh, 17px);
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .step-pill-num {
+      width: clamp(18px, 2.2vh, 24px);
+      height: clamp(18px, 2.2vh, 24px);
+      background: #4f46e5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(10px, 1.2vh, 13px);
+    }
+
+    .logic-arrow {
+      color: #818cf8;
+      font-size: clamp(14px, 1.8vh, 20px);
+    }
+
+    /* Slide 5: 三大核心角色能力模型 (Photo 5) */
+    .slide-roles {
+      background: #090a0f;
+      color: #ffffff;
+      padding: clamp(14px, 2.5vh, 32px) clamp(18px, 3vw, 52px);
+    }
+
+    .roles-header {
+      text-align: center;
+      margin-bottom: clamp(8px, 1.4vh, 16px);
+      flex-shrink: 0;
+    }
+
+    .roles-header h2 {
+      font-size: clamp(20px, 2.8vh, 36px);
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .roles-header p {
+      font-size: clamp(11.5px, 1.3vh, 15px);
+      color: #94a3b8;
+    }
+
+    .three-posters-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: clamp(10px, 1.5vw, 22px);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .role-poster {
+      background: #141722;
+      border: 1px solid #272e42;
+      border-radius: clamp(10px, 1.5vh, 16px);
+      padding: clamp(12px, 1.8vh, 22px) clamp(12px, 1.3vw, 20px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      min-height: 0;
+    }
+
+    .poster-accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+    }
+
+    .bar-red { background: #ef4444; }
+    .bar-orange { background: #f97316; }
+    .bar-purple { background: #8b5cf6; }
+
+    .poster-role-title {
+      font-size: clamp(18px, 2.4vh, 28px);
+      font-weight: 900;
+      margin-bottom: clamp(3px, 0.6vh, 6px);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .poster-slogan {
+      font-size: clamp(10.5px, 1.25vh, 13.5px);
+      color: #cbd5e1;
+      line-height: 1.4;
+      margin-bottom: clamp(8px, 1.2vh, 14px);
+      flex-shrink: 0;
+    }
+
+    .mentor-profile-card {
+      background: #1c2130;
+      border: 1px solid #2e374d;
+      border-radius: 9px;
+      padding: clamp(6px, 0.9vh, 11px) clamp(8px, 0.9vw, 13px);
+      margin-bottom: clamp(8px, 1.2vh, 14px);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-shrink: 0;
+    }
+
+    .mentor-avatar {
+      width: clamp(30px, 3.8vh, 40px);
+      height: clamp(30px, 3.8vh, 40px);
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(13px, 1.6vh, 17px);
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .mentor-info-name {
+      font-size: clamp(12px, 1.4vh, 15px);
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .mentor-info-title {
+      font-size: clamp(9.5px, 1.05vh, 11.5px);
+      color: #94a3b8;
+    }
+
+    .poster-domains-title {
+      font-size: clamp(10px, 1.15vh, 12.5px);
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: clamp(5px, 0.8vh, 9px);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .poster-domain-list {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(5px, 0.8vh, 9px);
+      flex-grow: 1;
+      justify-content: space-evenly;
+      min-height: 0;
+    }
+
+    .domain-item {
+      background: #181d2a;
+      border-radius: 7px;
+      padding: clamp(5px, 0.8vh, 9px) clamp(7px, 0.9vw, 11px);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .domain-item.red-border { border-left-color: #ef4444; }
+    .domain-item.orange-border { border-left-color: #f97316; }
+    .domain-item.purple-border { border-left-color: #8b5cf6; }
+
+    .domain-item-num {
+      font-size: clamp(8.5px, 0.95vh, 10.5px);
+      font-weight: 800;
+      color: #94a3b8;
+      margin-bottom: 1px;
+    }
+
+    .domain-item-heading {
+      font-size: clamp(11.5px, 1.3vh, 14px);
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1px;
+    }
+
+    .domain-item-desc {
+      font-size: clamp(9.5px, 1.05vh, 11.5px);
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+
+    /* Slide 6: 复盘与落地洞察 */
+    .slide-summary {
+      background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0a0b10 80%);
+      color: #ffffff;
+      padding: clamp(24px, 4vh, 50px) clamp(24px, 5vw, 80px);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .summary-quote-large {
+      font-size: clamp(28px, 4vw, 56px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: clamp(10px, 1.8vh, 22px);
+      background: linear-gradient(135deg, #ffffff 30%, #fb7185 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .summary-p-desc {
+      font-size: clamp(13px, 1.6vw, 21px);
+      color: #cbd5e1;
+      max-width: 1050px;
+      margin: 0 auto clamp(18px, 3vh, 40px) auto;
+      line-height: 1.6;
+    }
+
+    .summary-pipeline-steps {
+      display: flex;
+      gap: clamp(12px, 1.8vw, 24px);
+      width: 100%;
+      max-width: 1150px;
+      justify-content: center;
+    }
+
+    .pipeline-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: clamp(10px, 1.4vh, 15px);
+      padding: clamp(14px, 2vh, 24px) clamp(12px, 1.3vw, 20px);
+      backdrop-filter: blur(10px);
+      text-align: left;
+    }
+
+    .pipeline-step-badge {
+      font-size: clamp(10px, 1.1vh, 12px);
+      font-weight: 800;
+      color: #fb7185;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .pipeline-card-title {
+      font-size: clamp(16px, 2vh, 21px);
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .pipeline-card-text {
+      font-size: clamp(11.5px, 1.3vh, 14px);
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Floating Navigation Controls */
+    #nav-controls {
+      position: fixed;
+      bottom: 25px;
+      right: 35px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 40px;
+      padding: 8px 18px;
+      z-index: 999;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #38bdf8;
+    }
+
+    #slide-indicator {
+      color: #94a3b8;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 0 10px;
+      font-family: monospace;
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ef4444, #3b82f6, #10b981);
+      width: 0%;
+      transition: width 0.3s ease;
+      z-index: 1000;
+    }
+
+    /* Keyboard Shortcuts Modal Overlay */
+    #shortcuts-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: #181b24;
+      border: 1px solid #2d3446;
+      border-radius: 16px;
+      padding: 35px 45px;
+      width: 500px;
+      color: #ffffff;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #262c3c;
+      font-size: 16px;
+    }
+
+    .kbd-key {
+      background: #272d3f;
+      border: 1px solid #3d465e;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: monospace;
+      font-size: 14px;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Bar -->
+  <div id="progress-bar"></div>
+
+  <!-- Main 16:9 Presentation Stage -->
+  <div id="deck-container">
+
+    <!-- SLIDE 0: 封面 / 杭州三天复盘总结 -->
+    <div class="slide slide-cover active" data-index="0" data-bg="#06070a">
+      <div class="cover-badge">
+        <span>●</span> 杭州三天·AI商业落地实战复盘
+      </div>
+      <h1 class="cover-title">
+        从“会不会用AI”<br>
+        到把经验做成<span class="cover-highlight">系统资产</span>
+      </h1>
+      <div class="cover-quote">
+        “AI的价值不是生成快，而是复用快。<br>
+        让普通人开始拥有做软件、建系统、做资产的能力。”
+      </div>
+      <div class="cover-footer">
+        <div class="cover-footer-item"><span>核心逻辑:</span> 业务SOP × 大模型 = 自动化工作流</div>
+        <div class="cover-footer-item"><span>现场实战:</span> 全岗位AI作战地图 · 智能中枢 · Agent落地</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 1: 企业全岗位 AI 作战地图 (Photo 1) -->
+    <div class="slide slide-map" data-index="1" data-bg="#f8fafc">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="en-title">Enterprise AI Operating Map</div>
+          <div class="cn-title">企业全岗位 AI 作战地图</div>
+        </div>
+        <div class="header-right">
+          8个岗位共用一个AI中枢，每个岗位都有明确的应用内容和工作流
+        </div>
+      </div>
+
+      <div class="map-grid">
+        <!-- 岗位 1: 设计岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">设计岗</div>
+            <span class="role-tag tag-content">内容生产</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>场景 / 主体 / 创意库搭建</li>
+            <li>详情页排版与商业视觉生成</li>
+            <li>动态图与多渠道规范适配</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">需求</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">生成</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">审核</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">交付</span>
+          </div>
+        </div>
+
+        <!-- 岗位 2: 短视频岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">短视频岗</div>
+            <span class="role-tag tag-content">内容生产</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>全网热点跟踪与选题方向洞察</li>
+            <li>黄金前3秒脚本、分镜与镜头清单</li>
+            <li>拍摄、剪辑多版本裂变支持</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">选点</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">脚本</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">制作</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">发布</span>
+          </div>
+        </div>
+
+        <!-- 中央 AI 中枢 (Hub Column) -->
+        <div class="hub-column">
+          <div class="hub-badge">共享能力</div>
+          <div class="hub-circle-logo">AI</div>
+          <div class="hub-title">企业 AI 中枢</div>
+          <div class="hub-sub">所有岗位统一共享调用</div>
+
+          <div class="hub-modules">
+            <div class="hub-item">
+              <div class="hub-item-name">● 知识库</div>
+              <div class="hub-item-desc">品牌、产品、SOP、行规标准</div>
+            </div>
+            <div class="hub-item">
+              <div class="hub-item-name">● 智能体</div>
+              <div class="hub-item-desc">岗位任务自动分配与执行</div>
+            </div>
+            <div class="hub-item">
+              <div class="hub-item-name">● 自动化</div>
+              <div class="hub-item-desc">跨工具、跨平台串联协作节点</div>
+            </div>
+            <div class="hub-item">
+              <div class="hub-item-name">● 数据反哺</div>
+              <div class="hub-item-desc">全流程结果数据驱动下一轮迭代</div>
+            </div>
+          </div>
+
+          <div class="hub-footer-notice">
+            人类负责判断 ｜ 岗位负责校验 ｜ AI批量执行
+          </div>
+        </div>
+
+        <!-- 岗位 3: 策略运营岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">策略运营岗</div>
+            <span class="role-tag tag-growth">运营增长</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>竞品定价与核心卖点矩阵对比</li>
+            <li>行业趋势评估与蓝海机会识别</li>
+            <li>商品层级规划与上架策略建议</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">市场</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">分析</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">策略</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">落地</span>
+          </div>
+        </div>
+
+        <!-- 岗位 4: 直播运营岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">直播运营岗</div>
+            <span class="role-tag tag-growth">运营增长</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>开播话术打磨与促单脚本优化</li>
+            <li>实时在线数据与互动环境监控</li>
+            <li>场次复盘报告与高光亮点切片</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">准备</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">监控</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">复盘</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">优化</span>
+          </div>
+        </div>
+
+        <!-- 岗位 5: 剪辑岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">剪辑岗</div>
+            <span class="role-tag tag-content">内容生产</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>素材智能识别与自动分镜头粗剪</li>
+            <li>字幕生成、卡点节奏与画面吸合</li>
+            <li>动态卡片包装与高产出片</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">素材</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">粗剪</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">精修</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">分发</span>
+          </div>
+        </div>
+
+        <!-- 岗位 6: 内容策划岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">内容策划岗</div>
+            <span class="role-tag tag-content">内容生产</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>行业与竞品爆款逻辑深度拆解</li>
+            <li>观点库沉淀与差异化选题规划</li>
+            <li>长尾内容矩阵排期与全套剧本</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">抓取</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">选题</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">结构</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">定案</span>
+          </div>
+        </div>
+
+        <!-- 岗位 7: 销售岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">销售岗</div>
+            <span class="role-tag tag-sales">销售转化</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>客服话术 SOP 与异议解答库</li>
+            <li>高意向客户自动分级与跟进提醒</li>
+            <li>销售对练与真实谈单场景推演</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">接待</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">破冰</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">促成</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">复购</span>
+          </div>
+        </div>
+
+        <!-- 岗位 8: 数据运营岗 -->
+        <div class="role-card">
+          <div class="role-card-header">
+            <div class="role-name">数据运营岗</div>
+            <span class="role-tag tag-ops">经营管理</span>
+          </div>
+          <div class="role-badge-sub">AI 助手</div>
+          <ul class="role-features">
+            <li>全渠道多平台经营数据自动汇聚</li>
+            <li>经营日报自动生成与异常指标预警</li>
+            <li>多维商业看板与老板决策洞察支持</li>
+          </ul>
+          <div class="role-flow">
+            <span class="flow-step">汇总</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">分析</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">预警</span>
+            <span class="flow-arrow">➔</span>
+            <span class="flow-step">决策</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: AI员工公式 (Photo 2) -->
+    <div class="slide slide-formula" data-index="2" data-bg="#ffffff">
+      <div class="formula-logo-bar">
+        <div class="formula-logo-icon">AI</div>
+        <div class="formula-logo-text">AI 商业研习社</div>
+      </div>
+
+      <div class="formula-main-equation">
+        <span class="formula-red">AI员工</span>
+        <span>=</span>
+        <span>业务sop</span>
+        <span>+</span>
+        <span>调用大模型</span>
+      </div>
+
+      <div class="formula-columns">
+        <!-- 业务 SOP 拆解 -->
+        <div class="formula-col">
+          <svg class="down-arrow-svg" viewBox="0 0 24 24">
+            <path d="M12 4v12m0 0l-5-5m5 5l5-5" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <div class="formula-card-box">
+            梳理工作流程<br>
+            写清楚工作内容的顺序和标准
+          </div>
+        </div>
+
+        <!-- 调用大模型 拆解 -->
+        <div class="formula-col">
+          <svg class="down-arrow-svg" viewBox="0 0 24 24">
+            <path d="M12 4v12m0 0l-5-5m5 5l5-5" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <div class="formula-card-box">
+            找到擅长处理<br>
+            这个类型工作的大模型
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-banner-bottom">
+        💡 <strong>本质洞察：</strong> 能力以前长在人身上，员工走经验就散；只有拆出 SOP 并系统化，大模型才能放大你的商业护城河。
+      </div>
+
+      <div class="formula-rainbow-bar"></div>
+    </div>
+
+    <!-- SLIDE 3: 创造者基建与模型网关 (Photo 3) -->
+    <div class="slide slide-gateway" data-index="3" data-bg="#090a0f">
+      <div class="gateway-top-mono">// UNIFIED MODEL API GATEWAY</div>
+      <h2 class="gateway-headline">让每位 AI 创造者，少走一步弯路</h2>
+      <p class="gateway-sub">兼容 OpenAI / Claude / Gemini 协议，覆盖文本、图像、视频、语音，智能路由，统一计费。</p>
+
+      <div class="gateway-grid">
+        <!-- Terminal 交互卡片 -->
+        <div class="terminal-card">
+          <div class="terminal-bar">
+            <span class="term-dot dot-red"></span>
+            <span class="term-dot dot-yellow"></span>
+            <span class="term-dot dot-green"></span>
+            <span class="term-title">bash — terminal@tokendance-gateway</span>
+          </div>
+          <div class="terminal-body">
+            <p><span class="code-cmd">$ curl</span> https://tokendance.space/gateway/v1/chat/completions \</p>
+            <p style="padding-left: 20px;"><span class="code-flag">-H</span> <span class="code-str">"Content-Type: application/json"</span> \</p>
+            <p style="padding-left: 20px;"><span class="code-flag">-H</span> <span class="code-str">"Authorization: Bearer YOUR_KEY"</span> \</p>
+            <p style="padding-left: 20px;"><span class="code-flag">-d</span> '{</p>
+            <p style="padding-left: 40px;"><span class="code-key">"model"</span>: <span class="code-str">"claude-3-5-sonnet"</span>,</p>
+            <p style="padding-left: 40px;"><span class="code-key">"messages"</span>: [</p>
+            <p style="padding-left: 60px;">{<span class="code-key">"role"</span>: <span class="code-str">"user"</span>, <span class="code-key">"content"</span>: <span class="code-str">"解析这道餐饮招牌菜的爆款营销文案..."</span>}</p>
+            <p style="padding-left: 40px;">]</p>
+            <p style="padding-left: 20px;">}'</p>
+            <br>
+            <p class="code-dim"># 返回结果秒级流式响应...</p>
+          </div>
+          <div class="terminal-status-bar">
+            <span class="status-badge">● 200 OK · latency 312ms · tokens 42</span>
+            <span style="color: #94a3b8;">已有业务想法？让 Coding Agent 批量落地</span>
+          </div>
+        </div>
+
+        <!-- 真实落地应用矩阵 -->
+        <div class="gateway-side-cards">
+          <div class="app-showcase-box">
+            <div class="app-showcase-title">
+              <span>🍗 餐饮短视频脚本矩阵</span>
+              <span class="app-tag">实操上线</span>
+            </div>
+            <div class="app-showcase-desc">
+              输入菜品名与客单价，自动匹配爆款前3秒痛点切入点，批量产出小红书/抖音分镜拍摄清单。
+            </div>
+          </div>
+
+          <div class="app-showcase-box">
+            <div class="app-showcase-title">
+              <span>⭐ 大众点评高情商生成器</span>
+              <span class="app-tag">降本增效</span>
+            </div>
+            <div class="app-showcase-desc">
+              智能区分好评转化与恶评公关，结合店长个性化语气，秒级输出兼顾SEO搜索词与安抚回复。
+            </div>
+          </div>
+
+          <div class="app-showcase-box">
+            <div class="app-showcase-title">
+              <span>📊 自媒体与IP赛道看板</span>
+              <span class="app-tag">决策支撑</span>
+            </div>
+            <div class="app-showcase-desc">
+              全自动监控行业TOP10对标账号，结构化拆解选题热度、赞评比及商业转化变现路径。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: 工具不同，底层逻辑相同 (Photo 4) -->
+    <div class="slide slide-tools" data-index="4" data-bg="#101217">
+      <div class="tools-header">
+        <div class="tools-title-group">
+          <div class="main-t">工具不同，底层逻辑相同</div>
+          <div class="sub-t">国内2款，海外3款：能力各异，推进方式却高度一致</div>
+        </div>
+        <div class="tools-alert-tag">
+          💡 不要只学工具本身，看它们共同的推进逻辑
+        </div>
+      </div>
+
+      <div class="tools-comparison-layout">
+        <!-- 国内工具 -->
+        <div class="tools-section">
+          <div class="tools-section-title">国内工具</div>
+          <div class="tools-row">
+            <div class="tool-item-card">
+              <div class="tool-icon-wrap" style="background: #2563EB;">
+                <svg viewBox="0 0 48 48" width="46" height="46" fill="none">
+                  <!-- Robot Antenna -->
+                  <path d="M24 10V14" stroke="#BFDBFE" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="24" cy="8.5" r="2.5" fill="#FFFFFF"/>
+                  <!-- Robot Head -->
+                  <rect x="11" y="14" width="26" height="22" rx="7" fill="#FFFFFF"/>
+                  <!-- Visor Screen -->
+                  <rect x="14" y="17" width="20" height="11" rx="4" fill="#1E293B"/>
+                  <!-- Eyes -->
+                  <circle cx="19" cy="22.5" r="2.2" fill="#38BDF8"/>
+                  <circle cx="29" cy="22.5" r="2.2" fill="#38BDF8"/>
+                  <!-- Smile -->
+                  <path d="M21 31C22 32.2 23 32.5 24 32.5C25 32.5 26 32.2 27 31" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                  <!-- Ear pads -->
+                  <rect x="8.5" y="20" width="3" height="7" rx="1.5" fill="#BFDBFE"/>
+                  <rect x="36.5" y="20" width="3" height="7" rx="1.5" fill="#BFDBFE"/>
+                </svg>
+              </div>
+              <div>
+                <div class="tool-info-name">WorkBuddy</div>
+                <div class="tool-info-role">组织协同 · 任务与AI助理流转</div>
+              </div>
+            </div>
+            <div class="tool-item-card">
+              <div class="tool-icon-wrap" style="background: #00D287;">
+                <svg viewBox="0 0 48 48" width="46" height="46" fill="none">
+                  <!-- Inner circle -->
+                  <circle cx="24" cy="24" r="21" fill="#E6FAF2"/>
+                  <!-- Hair back -->
+                  <path d="M14 26C14 17 18 13 24 13C30 13 34 17 34 26C34 29 33.5 31.5 32 34C31 31 30.5 28 30.5 25V23C30.5 23 27.5 22 24 22C20.5 22 17.5 23 17.5 23V25C17.5 28 17 31 16 34C14.5 31.5 14 29 14 26Z" fill="#2E282A"/>
+                  <!-- Face -->
+                  <ellipse cx="24" cy="26.5" rx="8.5" ry="7.5" fill="#FDEEE6"/>
+                  <!-- Hair bangs -->
+                  <path d="M17 21.5C18.5 19.5 21 18.5 24 18.5C27 18.5 29.5 19.5 31 21.5C29.5 20.2 27 19.8 24 19.8C21 19.8 18.5 20.2 17 21.5Z" fill="#2E282A"/>
+                  <!-- Eyes -->
+                  <ellipse cx="20.5" cy="25.5" rx="1.2" ry="1.5" fill="#2E282A"/>
+                  <ellipse cx="27.5" cy="25.5" rx="1.2" ry="1.5" fill="#2E282A"/>
+                  <!-- Blush -->
+                  <circle cx="18" cy="27.8" r="1.5" fill="#F87171" opacity="0.6"/>
+                  <circle cx="30" cy="27.8" r="1.5" fill="#F87171" opacity="0.6"/>
+                  <!-- Smile -->
+                  <path d="M22.5 28.5C23 29.2 23.5 29.5 24 29.5C24.5 29.5 25 29.2 25.5 28.5" stroke="#E11D48" stroke-width="1.2" stroke-linecap="round"/>
+                  <!-- Headset / clip -->
+                  <circle cx="14.5" cy="24.5" r="2" fill="#00D287"/>
+                </svg>
+              </div>
+              <div>
+                <div class="tool-info-name">豆包工作</div>
+                <div class="tool-info-role">知识沉淀 · 企业内容批量加工</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 海外工具 -->
+        <div class="tools-section">
+          <div class="tools-section-title">海外工具</div>
+          <div class="tools-row">
+            <div class="tool-item-card">
+              <div class="tool-icon-wrap" style="background: #10A37F;">
+                <svg viewBox="0 0 24 24" width="34" height="34" fill="#FFFFFF">
+                  <path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6.07 6.07 0 0 0 4.98 4.18a5.98 5.98 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.2 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.75-7.08zm-9.02 12.61a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.8.8 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.49 4.5zm-9.66-4.13a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06l-4.84 2.8a4.5 4.5 0 0 1-6.14-1.65zM2.34 7.9a4.48 4.48 0 0 1 2.37-1.98v5.68a.77.77 0 0 0 .38.68l5.82 3.35-2.02 1.17a.08.08 0 0 1-.07 0l-4.83-2.79A4.5 4.5 0 0 1 2.34 7.9zm16.1 3.85-5.84-3.37 2.02-1.16a.08.08 0 0 1 .07 0l4.83 2.79a4.5 4.5 0 0 1-.68 8.1v-5.68a.79.79 0 0 0-.4-.68zm2-3.02-.14-.08-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.79 2.76a.8.8 0 0 0-.39.68v6.72zm1.01-1.4 2.6-1.5 2.61 1.5v3l-2.61 1.5-2.6-1.5z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="tool-info-name">ChatGPT</div>
+                <div class="tool-info-role">多模态通用底座 · GPTs 插件扩展</div>
+              </div>
+            </div>
+            <div class="tool-item-card">
+              <div class="tool-icon-wrap" style="background: #CC785C;">
+                <svg viewBox="0 0 24 24" width="34" height="34" fill="#FFFFFF">
+                  <path d="M12 2C12.55 2 13 2.45 13 3V7.2L16 4.2C16.39 3.81 17.02 3.81 17.41 4.2C17.8 4.59 17.8 5.22 17.41 5.61L14.4 8.62H18.6C19.15 8.62 19.6 9.07 19.6 9.62C19.6 10.17 19.15 10.62 18.6 10.62H14.4L17.41 13.63C17.8 14.02 17.8 14.65 17.41 15.04C17.02 15.43 16.39 15.43 16 15.04L13 12.04V16.24C13 16.79 12.55 17.24 12 17.24C11.45 17.24 11 16.79 11 16.24V12.04L8 15.04C7.61 15.43 6.98 15.43 6.59 15.04C6.2 14.65 6.2 14.02 6.59 13.63L9.6 10.62H5.4C4.85 10.62 4.4 10.17 4.4 9.62C4.4 9.07 4.85 8.62 5.4 8.62H9.6L6.59 5.61C6.2 5.22 6.2 4.59 6.59 4.2C6.98 3.81 7.61 3.81 8 4.2L11 7.2V3C11 2.45 11.45 2 12 2Z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="tool-info-name">Claude Code</div>
+                <div class="tool-info-role">终端智能体 · 复杂架构与长代码执行</div>
+              </div>
+            </div>
+            <div class="tool-item-card">
+              <div class="tool-icon-wrap multi-logo">
+                <!-- Google G Logo -->
+                <svg viewBox="0 0 24 24" width="28" height="28">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                </svg>
+                <!-- Antigravity Gradient Logo -->
+                <svg viewBox="0 0 28 28" width="28" height="28" fill="none">
+                  <path d="M14 3L4 23H9L11.5 18H16.5L19 23H24L14 3ZM14 9L15.8 14H12.2L14 9Z" fill="url(#agGrad)"/>
+                  <defs>
+                    <linearGradient id="agGrad" x1="4" y1="3" x2="24" y2="23" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#4285F4"/>
+                      <stop offset="0.33" stop-color="#8B5CF6"/>
+                      <stop offset="0.66" stop-color="#EA4335"/>
+                      <stop offset="1" stop-color="#FBBC05"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div>
+                <div class="tool-info-name">Google AI Studio / Antigravity</div>
+                <div class="tool-info-role">多代理协同 · 高阶 Agentic 编程工作台</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 共同底层逻辑 -->
+        <div class="logic-flow-box">
+          <div class="logic-label">共同底层推进逻辑</div>
+          <div class="logic-steps">
+            <div class="step-pill">
+              <span class="step-pill-num">1</span>
+              <span>找到真实业务场景</span>
+            </div>
+            <span class="logic-arrow">➔</span>
+            <div class="step-pill">
+              <span class="step-pill-num">2</span>
+              <span>抽象梳理业务 SOP</span>
+            </div>
+            <span class="logic-arrow">➔</span>
+            <div class="step-pill">
+              <span class="step-pill-num">3</span>
+              <span>搭建自动化工作流</span>
+            </div>
+          </div>
+          <div style="font-size: 20px; font-weight: 700; color: #a5b4fc;">
+            1 × SOP × 工作流
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: AI 时代的三大核心岗位 (Photo 5) -->
+    <div class="slide slide-roles" data-index="5" data-bg="#090a0f">
+      <div class="roles-header">
+        <h2>AI 时代的三大实战角色能力模型</h2>
+        <p>告别单点工具使用者，成为掌控“工作流与系统”的高壁垒操盘手</p>
+      </div>
+
+      <div class="three-posters-grid">
+        <!-- 角色 1: AI 视频编导 -->
+        <div class="role-poster">
+          <div class="poster-accent-bar bar-red"></div>
+          <h3 class="poster-role-title">AI 视频编导</h3>
+          <p class="poster-slogan">
+            告别盲目找对标，用AI重构“监控-分析-决策”实战生产流
+          </p>
+
+          <div class="mentor-profile-card">
+            <div class="mentor-avatar" style="background: #e11d48;">镓</div>
+            <div>
+              <div class="mentor-info-name">镓桧</div>
+              <div class="mentor-info-title">飞书工作流架构师 · 爆款实战导师</div>
+            </div>
+          </div>
+
+          <div class="poster-domains-title">✦ 擅长核心领域</div>
+          <div class="poster-domain-list">
+            <div class="domain-item red-border">
+              <div class="domain-item-num">01 / SYSTEM</div>
+              <div class="domain-item-heading">搭建竞品监控AI系统</div>
+              <div class="domain-item-desc">分钟级全渠道采集对标数据，24小时动态监控爆款轨迹</div>
+            </div>
+            <div class="domain-item red-border">
+              <div class="domain-item-num">02 / CONTENT</div>
+              <div class="domain-item-heading">突围爆款选题库</div>
+              <div class="domain-item-desc">全景拆解痛点与黄金钩子，结构化批量输出高转化剧本</div>
+            </div>
+            <div class="domain-item red-border">
+              <div class="domain-item-num">03 / FLOW</div>
+              <div class="domain-item-heading">搭建全自动流水线</div>
+              <div class="domain-item-desc">从人工低效搜集跃迁为Agent端到端智能产出</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 角色 2: AIGC 训练师 -->
+        <div class="role-poster">
+          <div class="poster-accent-bar bar-orange"></div>
+          <h3 class="poster-role-title">AIGC 训练师</h3>
+          <p class="poster-slogan">
+            掌握AIGC工具 + 重塑生产流程 = 抢占超级个体红利
+          </p>
+
+          <div class="mentor-profile-card">
+            <div class="mentor-avatar" style="background: #ea580c;">陈</div>
+            <div>
+              <div class="mentor-info-name">陈鹏</div>
+              <div class="mentor-info-title">AIGC商业落地领军者 · 千万级主理人</div>
+            </div>
+          </div>
+
+          <div class="poster-domains-title">✦ 擅长核心领域</div>
+          <div class="poster-domain-list">
+            <div class="domain-item orange-border">
+              <div class="domain-item-num">01 / VISUAL</div>
+              <div class="domain-item-heading">打造高转化视觉资产</div>
+              <div class="domain-item-desc">电商主图、详情页、场景合成全套标准化生产SOP</div>
+            </div>
+            <div class="domain-item orange-border">
+              <div class="domain-item-num">02 / STANDARD</div>
+              <div class="domain-item-heading">重塑商业交付标准</div>
+              <div class="domain-item-desc">以极高质感与极快响应速度形成传统设计无法企及的壁垒</div>
+            </div>
+            <div class="domain-item orange-border">
+              <div class="domain-item-num">03 / BUSINESS</div>
+              <div class="domain-item-heading">商业变现全链路落地</div>
+              <div class="domain-item-desc">个人生产力跃升，走向矩阵式商用赋能与规模化盈利</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 角色 3: AI 架构师 -->
+        <div class="role-poster">
+          <div class="poster-accent-bar bar-purple"></div>
+          <h3 class="poster-role-title">AI 架构师</h3>
+          <p class="poster-slogan">
+            掌握AI架构设计 + 工程落地全链路 = 构建高可用、高性能AI系统
+          </p>
+
+          <div class="mentor-profile-card">
+            <div class="mentor-avatar" style="background: #7c3aed;">卜</div>
+            <div>
+              <div class="mentor-info-name">卜士鹏</div>
+              <div class="mentor-info-title">AI架构工程专家 · 企业级解决方案专家</div>
+            </div>
+          </div>
+
+          <div class="poster-domains-title">✦ 擅长核心领域</div>
+          <div class="poster-domain-list">
+            <div class="domain-item purple-border">
+              <div class="domain-item-num">01 / ARCHITECTURE</div>
+              <div class="domain-item-heading">AI 顶层架构设计</div>
+              <div class="domain-item-desc">多智能体协同、模型路由调度分层与综合调用成本优化</div>
+            </div>
+            <div class="domain-item purple-border">
+              <div class="domain-item-num">02 / AGENT & RAG</div>
+              <div class="domain-item-heading">大模型深度应用架构</div>
+              <div class="domain-item-desc">业务SOP结构化入库、向量数据库构建与企业专有知识库</div>
+            </div>
+            <div class="domain-item purple-border">
+              <div class="domain-item-num">03 / ENGINEERING</div>
+              <div class="domain-item-heading">AI 工程化落地交付</div>
+              <div class="domain-item-desc">高并发高可用、低延迟响应、企业级系统无缝打通对接</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: 终章总结 (商业经验与AI资产) -->
+    <div class="slide slide-summary" data-index="6" data-bg="#0a0b10">
+      <h2 class="summary-quote-large">
+        “AI的价值不是生成快，<br>而是复用快。”
+      </h2>
+      <p class="summary-p-desc">
+        真正值钱的，始终是你在行业深耕十几年建立的<strong>业务经验、认知和判断力</strong>。<br>
+        AI不是取代你，而是作为超级放大器，把你的个人能力变成永不疲倦的企业资产。
+      </p>
+
+      <div class="summary-pipeline-steps">
+        <div class="pipeline-card">
+          <div class="pipeline-step-badge">STAGE 01</div>
+          <div class="pipeline-card-title">经验 ➔ SOP</div>
+          <div class="pipeline-card-text">把脑海中依靠感觉做的事，拆成有顺序、有标准的明确业务工作流。</div>
+        </div>
+        <div class="pipeline-card">
+          <div class="pipeline-step-badge">STAGE 02</div>
+          <div class="pipeline-card-title">SOP ➔ 知识库</div>
+          <div class="pipeline-card-text">将优秀话术、商业踩坑经验、客诉处理原则固化为企业数字资产。</div>
+        </div>
+        <div class="pipeline-card">
+          <div class="pipeline-step-badge">STAGE 03</div>
+          <div class="pipeline-card-title">知识库 ➔ Agent</div>
+          <div class="pipeline-card-text">通过大模型与智能体无缝调度，实现24小时不间断的自动化执行与规模化复用。</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 60px; font-size: 22px; color: #f43f5e; font-weight: 700;">
+        ⚡️ 学习不是目的，做出来才是。
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Floating Navigation Controls -->
+  <div id="nav-controls">
+    <button class="nav-btn" id="btn-prev" title="上一页 (←)">❮</button>
+    <div id="slide-indicator">01 / 07</div>
+    <button class="nav-btn" id="btn-next" title="下一页 (→ 或 空格)">❯</button>
+    <button class="nav-btn" id="btn-fullscreen" title="全屏 (F)">⛶</button>
+    <button class="nav-btn" id="btn-help" title="快捷键帮助 (?)">?</button>
+  </div>
+
+  <!-- Shortcuts Modal -->
+  <div id="shortcuts-modal">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>键盘快捷键</span>
+        <button id="modal-close" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+      <div class="shortcut-row">
+        <span>下一页</span>
+        <span><span class="kbd-key">→</span> 或 <span class="kbd-key">Space</span></span>
+      </div>
+      <div class="shortcut-row">
+        <span>上一页</span>
+        <span><span class="kbd-key">←</span> 或 <span class="kbd-key">Shift+Space</span></span>
+      </div>
+      <div class="shortcut-row">
+        <span>首页 / 尾页</span>
+        <span><span class="kbd-key">Home</span> / <span class="kbd-key">End</span></span>
+      </div>
+      <div class="shortcut-row">
+        <span>全屏演示</span>
+        <span><span class="kbd-key">F</span></span>
+      </div>
+      <div class="shortcut-row">
+        <span>快速跳页</span>
+        <span><span class="kbd-key">1</span> - <span class="kbd-key">7</span></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Slide Presentation Controller
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+
+    const indicator = document.getElementById('slide-indicator');
+    const progressBar = document.getElementById('progress-bar');
+    const deck = document.getElementById('deck-container');
+
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentIndex = index;
+
+      slides.forEach((slide, idx) => {
+        if (idx === currentIndex) {
+          slide.classList.add('active');
+          if (slide.dataset.bg) {
+            document.body.style.backgroundColor = slide.dataset.bg;
+          }
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      indicator.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      progressBar.style.width = `${((currentIndex + 1) / totalSlides) * 100}%`;
+    }
+
+    function nextSlide() {
+      if (currentIndex < totalSlides - 1) {
+        updateSlide(currentIndex + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        updateSlide(currentIndex - 1);
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    // Double-click blank area to toggle fullscreen
+    document.addEventListener('dblclick', (e) => {
+      if (e.target.closest('#nav-controls') || e.target.closest('#shortcuts-modal') || e.target.closest('button')) return;
+      toggleFullScreen();
+    });
+
+    // Update fullscreen button icon and title on change
+    function onFullscreenChange() {
+      const isFull = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const btn = document.getElementById('btn-fullscreen');
+      if (isFull) {
+        btn.innerHTML = '🗗';
+        btn.title = '退出全屏 (F / Esc / 双击)';
+      } else {
+        btn.innerHTML = '⛶';
+        btn.title = '全屏演示 (F / 双击空白处)';
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        updateSlide(totalSlides - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullScreen();
+      } else if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+        const modal = document.getElementById('shortcuts-modal');
+        modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+      } else if (e.key >= '1' && e.key <= '7') {
+        updateSlide(parseInt(e.key) - 1);
+      } else if (e.key === 'Escape') {
+        document.getElementById('shortcuts-modal').style.display = 'none';
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    window.addEventListener('touchend', e => {
+      const touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      if (touchEndX - touchStartX > 50) prevSlide();
+    });
+
+    // Controls listeners
+    document.getElementById('btn-next').addEventListener('click', nextSlide);
+    document.getElementById('btn-prev').addEventListener('click', prevSlide);
+    document.getElementById('btn-fullscreen').addEventListener('click', toggleFullScreen);
+    
+    const modal = document.getElementById('shortcuts-modal');
+    document.getElementById('btn-help').addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+    document.getElementById('modal-close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Initialize
+    updateSlide(0);
+  </script>
+</body>
+</html>

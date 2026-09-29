@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>23 万次调用与 200 亿 Token：一个电商运营的 AI 落地实录</title>
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --card-bg: rgba(18, 22, 34, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-glow: rgba(59, 130, 246, 0.3);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Background Ambient Glow */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+    }
+
+    /* Presentation Stage */
+    #deck-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98) translateY(12px);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      padding: clamp(20px, 3.5vh, 48px) clamp(24px, 4.5vw, 68px);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    /* Top Progress Bar */
+    .top-progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.06);
+      z-index: 100;
+    }
+
+    .top-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+      transition: width 0.3s ease;
+    }
+
+    /* Universal Slide Header */
+    .slide-header {
+      margin-bottom: clamp(16px, 2.5vh, 32px);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: clamp(10px, 1.5vh, 18px);
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: clamp(11px, 1.3vh, 13px);
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+    }
+
+    .slide-title {
+      font-size: clamp(22px, 3.2vh, 38px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: clamp(12px, 1.6vh, 16px);
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .header-right-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: clamp(11px, 1.3vh, 13px);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* Slide Content Container */
+    .slide-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: clamp(16px, 2.5vw, 36px);
+      align-items: stretch;
+      position: relative;
+    }
+
+    /* Glass Card Style */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: clamp(12px, 1.8vh, 20px);
+      padding: clamp(16px, 2.2vh, 28px);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: var(--card-border-glow);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Slide 0: Cover Styling */
+    .slide-cover {
+      justify-content: center;
+      align-items: flex-start;
+      padding: clamp(40px, 8vh, 100px) clamp(30px, 7vw, 120px);
+      position: relative;
+    }
+
+    .cover-top-badges {
+      display: flex;
+      gap: 12px;
+      margin-bottom: clamp(16px, 2.8vh, 32px);
+      flex-wrap: wrap;
+    }
+
+    .cover-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: clamp(11px, 1.4vh, 14px);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .pill-cyan {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      color: #38bdf8;
+    }
+
+    .pill-purple {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #c084fc;
+    }
+
+    .pill-amber {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+
+    .cover-main-title {
+      font-size: clamp(34px, 5.8vw, 76px);
+      font-weight: 900;
+      line-height: 1.12;
+      margin-bottom: clamp(14px, 2.2vh, 24px);
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 75%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-sub-title {
+      font-size: clamp(16px, 2.4vh, 26px);
+      font-weight: 400;
+      color: #cbd5e1;
+      max-width: 900px;
+      line-height: 1.5;
+      margin-bottom: clamp(24px, 4.5vh, 48px);
+    }
+
+    .cover-sub-title strong {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .cover-meta {
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 3vw, 40px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: clamp(16px, 2.5vh, 28px);
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-size: clamp(11px, 1.2vh, 13px);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .meta-val {
+      font-size: clamp(14px, 1.8vh, 18px);
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    /* Common Card Headers */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: clamp(10px, 1.5vh, 18px);
+    }
+
+    .card-tag {
+      font-size: clamp(10px, 1.2vh, 12px);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent-cyan);
+    }
+
+    .card-title {
+      font-size: clamp(16px, 2.2vh, 22px);
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: clamp(12px, 1.6vh, 15px);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Image Showcase Components */
+    .img-box {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      cursor: zoom-in;
+    }
+
+    .img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .img-box:hover img {
+      transform: scale(1.02);
+    }
+
+    .img-zoom-tip {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      pointer-events: none;
+    }
+
+    /* Metric Badges */
+    .stat-hero-number {
+      font-size: clamp(28px, 4.5vh, 48px);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .text-gradient-cyan {
+      background: linear-gradient(135deg, #38bdf8, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-emerald {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-purple {
+      background: linear-gradient(135deg, #c084fc, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-amber {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* High-contrast Comparison Grid */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(14px, 2vw, 24px);
+      height: 100%;
+    }
+
+    .compare-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 4-Column Grid */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(12px, 1.5vw, 20px);
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(14px, 2vw, 24px);
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(16px, 2.5vw, 32px);
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Callout & Golden Quotes */
+    .quote-box {
+      border-left: 3px solid var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.08);
+      padding: clamp(10px, 1.5vh, 16px) clamp(14px, 1.8vw, 20px);
+      border-radius: 0 12px 12px 0;
+      font-size: clamp(13px, 1.7vh, 16px);
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .quote-box strong {
+      color: #38bdf8;
+    }
+
+    /* Bottom Control Bar */
+    .deck-controls {
+      position: fixed;
+      bottom: clamp(10px, 1.8vh, 22px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 40px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .control-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      padding: 0 8px;
+    }
+
+    /* Quick jump dots */
+    .dots-nav {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot-item {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .dot-item.active {
+      width: 18px;
+      border-radius: 10px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.7);
+    }
+
+    /* Keyboard Help Modal */
+    #shortcuts-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-content {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 30px 40px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 20px;
+    }
+
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 14px;
+    }
+
+    .kbd-key {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-family: monospace;
+      color: #38bdf8;
+      font-size: 12px;
+    }
+
+    /* Lightbox Modal for Images */
+    #img-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(15px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      cursor: zoom-out;
+      padding: 40px;
+    }
+
+    #img-lightbox img {
+      max-width: 95vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-bg"></div>
+
+  <!-- Top Progress Bar -->
+  <div class="top-progress-container">
+    <div class="top-progress-bar" id="top-progress"></div>
+  </div>
+
+  <!-- Presentation Stage -->
+  <div id="deck-container">
+
+    <!-- ==========================================
+         Slide 0: 封面
+         ========================================== -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="cover-top-badges">
+        <span class="cover-pill pill-cyan">⚡ 内部 AI 应用实战复盘</span>
+        <span class="cover-pill pill-purple">🎯 业务工作流重构</span>
+        <span class="cover-pill pill-amber">🏆 电商运营超级个体</span>
+      </div>
+
+      <h1 class="cover-main-title">23 万次调用与 200 亿 Token</h1>
+      <p class="cover-sub-title">
+        一个电商运营的 <strong>AI 落地实录</strong>：从最朴素的“手动偷懒”，到全面接管天猫推广、达摩盘与实时客服质检业务流
+      </p>
+
+      <div class="cover-meta">
+        <div class="meta-item">
+          <span class="meta-label">演讲主题</span>
+          <span class="meta-val">AI 嵌入业务流程实战</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">核心突破</span>
+          <span class="meta-val">推广白盒化 · 达摩盘大模型 · 客服实时质检</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">演示操作</span>
+          <span class="meta-val">按 <kbd class="kbd-key">F</kbd> 开启全屏 · <kbd class="kbd-key">→</kbd> 下一页</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 1: 开场实证 —— 131 天打卡记录
+         ========================================== -->
+    <div class="slide" data-index="1">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">01 / 开场实证 · 心智蜕变</div>
+          <div class="slide-title">131 天热力图：从“灰白尝鲜”到“深绿全勤”</div>
+          <div class="slide-subtitle">真实使用热力图记录，见证工作方式的根本性断代演变</div>
+        </div>
+        <div class="header-right-badge">真实数据打卡凭据</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: Image Box -->
+        <div class="glass-card" style="flex: 1.2; justify-content: center; align-items: center; padding: 12px;">
+          <div class="img-box" style="width: 100%; height: 100%;" onclick="openLightbox('./assets/token_heatmap.png')">
+            <img src="./assets/token_heatmap.png" alt="AI使用热力图 (209.94B Tokens)">
+            <div class="img-zoom-tip">🔍 点击放大查看热力图细节</div>
+          </div>
+        </div>
+
+        <!-- Right: Narrative -->
+        <div style="flex: 1; display: flex; flex-direction: column; gap: clamp(12px, 1.8vh, 20px);">
+          <div class="glass-card" style="border-left: 4px solid var(--text-dim);">
+            <div class="card-header">
+              <span class="card-tag">第一阶段 (2月 ~ 5月)</span>
+              <span style="font-size: 12px; color: var(--text-dim);">灰白与零星浅绿</span>
+            </div>
+            <div class="card-title">玩具尝鲜期：没有固定习惯</div>
+            <div class="card-desc">
+              和绝大多数人一样，当成“更聪明的搜索框”或文案润色工具。偶尔想起来问一句，没有与实际天猫业务形成任何绑定。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-left: 4px solid var(--accent-emerald); background: rgba(16, 185, 129, 0.06);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-emerald);">第二阶段 (6月 ~ 9月)</span>
+              <span style="font-size: 12px; color: var(--accent-emerald); font-weight: 600;">深绿满格连续全勤</span>
+            </div>
+            <div class="card-title">全面爆发期：AI 接管核心业务流</div>
+            <div class="card-desc">
+              彻底撕掉“聊天框”标签，全面接入自动化脚本、浏览器插件与循环 Loop。<strong>日均消耗 1.6 亿 Tokens</strong>，AI 成为不可或缺的业务外脑。
+            </div>
+          </div>
+
+          <div class="quote-box">
+            <strong>核心思考：</strong>“这不是为了刷数据，而是每天早上一睁眼，我的自动化插件与 AI 工作流已经在替我跑完前一天的海量业务数据了。”
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 2: 硬核底牌 —— 22.8 万次调用的背后
+         ========================================== -->
+    <div class="slide" data-index="2">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">02 / 工业级实力 · 绝非纸上谈兵</div>
+          <div class="slide-title">22.8 万次调用与 94% 缓存：真实的工程化落地</div>
+          <div class="slide-subtitle">真金白银烧出来的实战沉淀，绝非浮于表面的免费教程</div>
+        </div>
+        <div class="header-right-badge">工业级指标</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: Image Box -->
+        <div class="glass-card" style="flex: 1.1; justify-content: center; align-items: center; padding: 12px;">
+          <div class="img-box" style="width: 100%; height: 100%;" onclick="openLightbox('./assets/token_stats.png')">
+            <img src="./assets/token_stats.png" alt="详细统计数据 (22.8万次请求 / 93.9% Caching)">
+            <div class="img-zoom-tip">🔍 点击放大查看后台消耗明细</div>
+          </div>
+        </div>
+
+        <!-- Right: 3 Metric Cards -->
+        <div style="flex: 1.1; display: flex; flex-direction: column; gap: clamp(10px, 1.4vh, 16px);">
+          
+          <div class="glass-card" style="padding: 16px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase;">Total Requests</div>
+                <div class="stat-hero-number text-gradient-cyan">228,623 <span style="font-size: 16px; font-weight: normal; color: #94a3b8;">次</span></div>
+              </div>
+              <div style="text-align: right; max-width: 260px;">
+                <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">日均近 2,000 次调用</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                  绝不可能靠手敲键盘，这是<strong>程序化自动化 Loop</strong> 跑出来的业务闭环。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding: 16px 20px; border-left: 3px solid var(--accent-emerald);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase;">Prompt Caching</div>
+                <div class="stat-hero-number text-gradient-emerald">93.9% <span style="font-size: 16px; font-weight: normal; color: #94a3b8;">命中</span></div>
+              </div>
+              <div style="text-align: right; max-width: 260px;">
+                <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">172.97 亿 Token 缓存</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                  工业级架构设计：把<strong>天猫规则、质检标准、大盘知识</strong>常驻上下文，极致降本。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding: 16px 20px; border-left: 3px solid var(--accent-amber);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 12px; color: var(--text-dim); text-transform: uppercase;">Total Investment</div>
+                <div class="stat-hero-number text-gradient-amber">$15,737 <span style="font-size: 16px; font-weight: normal; color: #94a3b8;">USD</span></div>
+              </div>
+              <div style="text-align: right; max-width: 260px;">
+                <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">约合 11 万+ 人民币</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                  真实的商业投资，换来的是几十倍于外部软件的人效与业务确定性增量。
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 3: 起点 —— 始于一次最朴素的“偷懒”
+         ========================================== -->
+    <div class="slide" data-index="3">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">03 / 案例复盘 · 起点之战</div>
+          <div class="slide-title">始于一次最朴素的“偷懒”：小曼护航自动化</div>
+          <div class="slide-subtitle">最伟大的效率革命，往往发端于一线最痛苦、最机械的那个重复动作</div>
+        </div>
+        <div class="header-right-badge">业务自动化原型</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-rose);">Pain Point · 痛点</span>
+              <span style="font-size: 20px;">😫</span>
+            </div>
+            <div class="card-title">几十个计划，机械循环点击</div>
+            <div class="card-desc">
+              为了把每一个推广计划都加全，必须人工循环去点“小曼护航”。
+              <br><br>
+              如果有 10 个、20 个甚至几十个计划，<strong>每天光是机械点击就要耗费 1 到 2 个小时</strong>，手点得发麻，注意力被极度消耗。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-color: rgba(6, 182, 212, 0.3);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-cyan);">Action · 行动</span>
+              <span style="font-size: 20px;">🤖</span>
+            </div>
+            <div class="card-title">让 AI 写个插件，接管浏览器</div>
+            <div class="card-desc">
+              恰逢大模型兴起，萌生想法：能不能用 AI 尝试做个小工具？
+              <br><br>
+              从 0 开始不断向 AI 提问：<strong>让它指导写出网页插件代码、教它定位 DOM 元素、让它打开浏览器排查调试</strong>，一步步打磨出最小可用产品（MVP）。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-emerald);">Result · 战果</span>
+              <span style="font-size: 20px;">🎉</span>
+            </div>
+            <div class="card-title">每天固定省下 1~2 小时！</div>
+            <div class="card-desc">
+              插件一次点击自动搞定所有计划加全。做成的那一刻极度兴奋，因为这是<strong>真正从繁琐搬砖中买回了自由时间</strong>。
+              <br><br>
+              <strong>最宝贵的心智突破：</strong>发现 AI 并非高不可攀，只要你懂痛点，AI 就能帮你变成“手搓工具的程序员”。
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div style="margin-top: clamp(10px, 1.5vh, 18px);">
+        <div class="quote-box">
+          <strong>启示：</strong>“不要试图一上来就重构全公司流程。先找到明天上班最让你恶心、最想砸键盘的那一个按钮，让 AI 替你点掉它！”
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 4: 进阶 —— 推广运营工具箱：黑盒变白盒
+         ========================================== -->
+    <div class="slide" data-index="4">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">04 / 工具深化 · 业务白盒化</div>
+          <div class="slide-title">推广运营工具箱：把广告投放“从黑盒变白盒”</div>
+          <div class="slide-subtitle">不再被平台后台牵着鼻子走，把所有操盘核心细节掌控在运营手中</div>
+        </div>
+        <div class="header-right-badge">业务中台化</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-4">
+
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag">工具能力 01</span>
+              <span style="font-size: 18px;">📋</span>
+            </div>
+            <div class="card-title">推广计划一键复制</div>
+            <div class="card-desc">
+              告别人肉一个个搭建同质计划的繁琐流程。一键克隆计划、自动继承定向与出价，搭建矩阵提效 <strong>10 倍</strong>。
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag">工具能力 02</span>
+              <span style="font-size: 18px;">⏱️</span>
+            </div>
+            <div class="card-title">投放时段深度透视</div>
+            <div class="card-desc">
+              全天 24 小时转化效率秒级穿透，清楚识别哪些时段是高 ROI 黄金期、哪些时段在纯烧钱空耗，动态调整折扣。
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag">工具能力 03</span>
+              <span style="font-size: 18px;">🗺️</span>
+            </div>
+            <div class="card-title">地域转化精准穿透</div>
+            <div class="card-desc">
+              全国省市级颗粒度转化报表自动聚合，剔除高客退、低转化偏远地域，把推广预算集中打在核心消费高地。
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag">工具能力 04</span>
+              <span style="font-size: 18px;">👥</span>
+            </div>
+            <div class="card-title">计划人群资产洞察</div>
+            <div class="card-desc">
+              穿透每个计划底层的人群画像与数据流转，看清每一分推广预算到底花在了哪些人身上，精准卡位高潜买家。
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div style="margin-top: clamp(10px, 1.5vh, 18px);">
+        <div class="glass-card" style="padding: 12px 20px; flex-direction: row; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <span style="font-weight: 700; color: #ef4444;">传统推广痛点：黑盒运作 · 盲目出价 · 归因全靠猜</span>
+            <span style="color: var(--text-dim);">➔</span>
+            <span style="font-weight: 700; color: #10b981;">AI 插件化之后：彻底白盒 · 精准控盘 · 策略秒级响应</span>
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">从“被动接受规则”到“主动制定策略”</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 5: 降维打击 —— 达摩盘大模型
+         ========================================== -->
+    <div class="slide" data-index="5">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">05 / 降维打击 · 行业分析模版</div>
+          <div class="slide-title">达摩盘大模型：30 分钟跑完行业 2 年全数据</div>
+          <div class="slide-subtitle">结合多年天猫操盘方法论，用 AI 打造超越外部 10 万级软件的数据核武器</div>
+        </div>
+        <div class="header-right-badge">高价值资产</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+
+          <!-- Left: Pain & Contrast -->
+          <div class="glass-card" style="justify-content: space-between;">
+            <div>
+              <div class="card-header">
+                <span class="card-tag" style="color: var(--accent-amber);">真实攻坚案例</span>
+                <span style="font-size: 12px; color: var(--text-dim);">护眼大路灯（HPL）行业分析</span>
+              </div>
+              <div class="card-title">人肉下载 vs AI 自动化分析</div>
+              <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
+                <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                  <div style="font-weight: 600; color: #f87171; font-size: 13px;">传统模式：人肉搬砖</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                    下载半年至一年行业数据，手动清洗拼接、画透视表，<strong>至少耗时 1 到 2 整天</strong>，且极易疲劳出错。
+                  </div>
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                  <div style="font-weight: 600; color: #34d399; font-size: 13px;">AI 全自动化大模板</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                    数据采集、生成报告、提炼核心洞察、挖掘细分场景，<strong>全程只需 30 分钟到 1 小时</strong>！效率提升近 20 倍。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 14px;">
+              <strong>方法论产品化：</strong>将多年天猫老运营的“看盘心法”封装进 AI 模板，任何人都能一键跑出总监级报告。
+            </div>
+          </div>
+
+          <!-- Right: 10W+ Tool Benchmark -->
+          <div class="glass-card" style="border-color: rgba(139, 92, 246, 0.4); justify-content: space-between;">
+            <div>
+              <div class="card-header">
+                <span class="card-tag" style="color: var(--accent-purple);">商业价值横评</span>
+                <span style="font-size: 12px; color: var(--accent-purple); font-weight: 600;">超越市面 10 万+ 工具</span>
+              </div>
+              <div class="card-title">为什么自研 AI 模板比 10 万软件更准？</div>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: var(--accent-cyan); font-size: 16px;">✓</span>
+                  <div>
+                    <strong style="color: #f1f5f9; font-size: 14px;">两年全量维度覆盖：</strong>
+                    <div style="font-size: 12px; color: var(--text-muted);">人群结构演变、访客波动、GMV 走势、加购转化曲线全部毫秒级归集。</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: var(--accent-cyan); font-size: 16px;">✓</span>
+                  <div>
+                    <strong style="color: #f1f5f9; font-size: 14px;">一手数据真实可靠：</strong>
+                    <div style="font-size: 12px; color: var(--text-muted);">外部软件大多是抽样估算，自研模板直接源自达摩盘真实底层数据。</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: var(--accent-cyan); font-size: 16px;">✓</span>
+                  <div>
+                    <strong style="color: #f1f5f9; font-size: 14px;">极速场景挖掘：</strong>
+                    <div style="font-size: 12px; color: var(--text-muted);">针对母婴、儿童近视防控、大平层书房等细分场景，瞬间输出定位洞察。</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background: rgba(139, 92, 246, 0.12); padding: 12px; border-radius: 8px; font-size: 12px; color: #ddd6fe;">
+              💡 <strong>核心真相：</strong>外部工具卖 10 万，卖的是通用界面；而我们 30 分钟跑出来的，是与本店货品高度吻合的<strong>真金白银决策指南</strong>。
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 6: 斩杀线 —— 实时客服质检
+         ========================================== -->
+    <div class="slide" data-index="6">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">06 / 直击斩杀线 · 转化闭环</div>
+          <div class="slide-title">实时客服质检系统：直击询单转化生死线</div>
+          <div class="slide-subtitle">运营见效最快的一环——从“次日遗憾复盘”进化为“当天实时拦截完单”</div>
+        </div>
+        <div class="header-right-badge">直接驱动 GMV</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+
+          <div class="glass-card">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-amber);">痛点与转机</span>
+              <span style="font-size: 18px;">💡</span>
+            </div>
+            <div class="card-title">打破“当天不可见”盲区</div>
+            <div class="card-desc">
+              询单转化是电商转化率最关键的一环。以往最大痛点是<strong>看不到当天的实时聊天</strong>，次日看报表，流失的客户早就去了别家。
+              <br><br>
+              <strong>关键协同：</strong>与客服主管<strong>陈伟</strong>深入沟通后，惊喜发现当天聊天数据完全能够实时获取！双方一拍即合。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-color: rgba(6, 182, 212, 0.35);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-cyan);">实时拦截</span>
+              <span style="font-size: 18px;">🎯</span>
+            </div>
+            <div class="card-title">现场指导 · 实时完单</div>
+            <div class="card-desc">
+              光速通过插件上线<strong>实时客服质检系统</strong>。
+              <br><br>
+              现在运营小伙伴每天盯着客服实时询单对话：
+              <br>
+              • 客户还在犹豫？<strong>立马协同客服补发优惠/痛点话术</strong>；<br>
+              • 客服回答生硬？<strong>当场纠偏，在客户关掉对话框前抢回订单</strong>！
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.05);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-amber);">资产沉淀</span>
+              <span style="font-size: 18px;">🏆</span>
+            </div>
+            <div class="card-title">AI 自动萃取“金牌对话”</div>
+            <div class="card-desc">
+              不仅质检问题，AI 还在每天自动阅读成千上万条对白，<strong>挖掘高转化、高客单成交的“金牌对白”</strong>。
+              <br><br>
+              把销冠客服的逼单技巧与应对套路快速沉淀成标准知识库，让每一个普通客服都具备顶级销冠的实战能力。
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div style="margin-top: clamp(10px, 1.5vh, 18px);">
+        <div class="quote-box" style="border-color: var(--accent-emerald);">
+          <strong>运营价值定论：</strong>“从公域投放把人拉进店，到客服实时促成完单，AI 真正串联起了从流感到真金白银的每一米链路！”
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 7: 底层认知跃迁
+         ========================================== -->
+    <div class="slide" data-index="7">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">07 / 方法论总结 · 认知跃迁</div>
+          <div class="slide-title">运营人驾驭 AI 的进化阶梯：从 Prompt 到 Harness</div>
+          <div class="slide-subtitle">为什么你总是用不好 AI？因为你还停留在最底层的“聊天框”里</div>
+        </div>
+        <div class="header-right-badge">能力模型重塑</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-4">
+
+          <div class="glass-card" style="border-top: 3px solid #64748b;">
+            <div class="card-header">
+              <span class="card-tag">Level 1</span>
+              <span style="font-size: 16px;">💬</span>
+            </div>
+            <div class="card-title" style="color: #cbd5e1;">Prompt (提示词)</div>
+            <div style="font-size: 12px; color: var(--accent-cyan); margin-bottom: 8px;">停留在网页对话框</div>
+            <div class="card-desc" style="font-size: 13px;">
+              把 AI 当玩具，偶尔写写文案。答案靠运气，缺乏业务上下文，容易产生幻觉与失望。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-top: 3px solid var(--accent-blue);">
+            <div class="card-header">
+              <span class="card-tag">Level 2</span>
+              <span style="font-size: 16px;">📚</span>
+            </div>
+            <div class="card-title" style="color: #93c5fd;">Context (上下文)</div>
+            <div style="font-size: 12px; color: var(--accent-blue); margin-bottom: 8px;">常驻规则与背景知识</div>
+            <div class="card-desc" style="font-size: 13px;">
+              <strong>93.9% 缓存率的秘密</strong>：将天猫规则、本店商品库、质检标准注入 Context，让 AI 像资深老员工一样思考。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-top: 3px solid var(--accent-purple);">
+            <div class="card-header">
+              <span class="card-tag">Level 3</span>
+              <span style="font-size: 16px;">⚙️</span>
+            </div>
+            <div class="card-title" style="color: #c084fc;">Loop (自动化循环)</div>
+            <div style="font-size: 12px; color: var(--accent-purple); margin-bottom: 8px;">手搓插件与工作流</div>
+            <div class="card-desc" style="font-size: 13px;">
+              <strong>22.8 万次调用的根源</strong>：网页插件自动循环点击、批量爬取达摩盘、自动监控客服，彻底替代双手。
+            </div>
+          </div>
+
+          <div class="glass-card" style="border-top: 3px solid var(--accent-emerald); background: rgba(16, 185, 129, 0.05);">
+            <div class="card-header">
+              <span class="card-tag" style="color: var(--accent-emerald);">Level 4</span>
+              <span style="font-size: 16px;">🏇</span>
+            </div>
+            <div class="card-title" style="color: #34d399;">Harness (业务缰绳)</div>
+            <div style="font-size: 12px; color: var(--accent-emerald); margin-bottom: 8px;">操盘经验驾驭多 Agent</div>
+            <div class="card-desc" style="font-size: 13px;">
+              <strong>超级个体的终极形态</strong>：业务认知做支架，指挥调度数据、推广、客服等多个 AI 模块，形成确定性商业增量。
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div style="margin-top: clamp(10px, 1.5vh, 18px);">
+        <div class="glass-card" style="padding: 14px 24px; text-align: center; border-color: rgba(6, 182, 212, 0.4);">
+          <span style="font-size: clamp(14px, 1.9vh, 18px); font-weight: 700; color: #f8fafc;">
+            黄金公式：
+            <span style="color: var(--accent-amber);">顶级天猫操盘认知</span> 
+            × 
+            <span style="color: var(--accent-cyan);">AI 工业化执行力</span> 
+            = 
+            <span style="color: var(--accent-emerald);">不可替代的超级个体</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         Slide 8: 行动倡议与收官
+         ========================================== -->
+    <div class="slide" data-index="8">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">08 / 全员倡议 · 立即出发</div>
+          <div class="slide-title">明天上班，你也能开启自己的“第一个插件”</div>
+          <div class="slide-subtitle">不要等待完美，放下对代码的恐惧，从最细小、最烦人的痛点开始</div>
+        </div>
+        <div class="header-right-badge">行动指南</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+
+          <!-- Left: 4 Action Steps -->
+          <div class="glass-card" style="justify-content: space-between;">
+            <div>
+              <div class="card-title" style="color: var(--accent-cyan); margin-bottom: 16px;">给全体小伙伴的 4 条实战倡议</div>
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="background: rgba(6, 182, 212, 0.2); color: #38bdf8; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0;">1</span>
+                  <div style="font-size: 13px; color: #e2e8f0;">
+                    <strong>拒绝宏大叙事，从小事开始：</strong>找一个明天上班你最讨厌的机械动作（查数据、对账单、循环点击），先把它干掉。
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="background: rgba(139, 92, 246, 0.2); color: #c084fc; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0;">2</span>
+                  <div style="font-size: 13px; color: #e2e8f0;">
+                    <strong>破除代码恐惧：</strong>你不需要先去学 Python 或 JavaScript。AI 会自己开浏览器排错，你只要当好“产品经理”说明白需求。
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0;">3</span>
+                  <div style="font-size: 13px; color: #e2e8f0;">
+                    <strong>多跟一线业务聊聊：</strong>像我和陈伟主管的沟通一样，很多卡住业务的巨大机会，往往就藏在一两句跨部门的沟通碰撞中。
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0;">4</span>
+                  <div style="font-size: 13px; color: #e2e8f0;">
+                    <strong>把跑通的方法固化为资产：</strong>自己提效是加法，把好用的插件、Prompt 和模板沉淀给部门，才是指数级的乘法。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; font-size: 12px; color: var(--text-muted);">
+              ✦ 欢迎随时找我交流插件编写、达摩盘取数与业务质检自动化！
+            </div>
+          </div>
+
+          <!-- Right: Closing Impact -->
+          <div class="glass-card" style="justify-content: center; align-items: center; text-align: center; padding: clamp(24px, 4vh, 48px); background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, rgba(18, 22, 34, 0.8) 100%);">
+            <div style="font-size: 40px; margin-bottom: 16px;">🚀</div>
+            <div style="font-size: clamp(20px, 2.8vh, 32px); font-weight: 800; line-height: 1.3; margin-bottom: 16px; color: #ffffff;">
+              “限制 AI 生产力的从来不是算法，<br>而是我们对业务流程的解构力。”
+            </div>
+            <div style="font-size: clamp(13px, 1.8vh, 16px); color: #94a3b8; max-width: 420px; line-height: 1.6; margin-bottom: 24px;">
+              未来不会淘汰电商人，但掌握自动化工作流的电商人，正在以 10 倍的速度甩开竞争对手。
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #38bdf8;">
+              <span>Q & A · 开启现场交流</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Floating Control Bar -->
+  <div class="deck-controls">
+    <button class="control-btn" id="btn-prev" title="上一页 (← / PageUp)">◀</button>
+    <div class="slide-counter" id="slide-counter">01 / 09</div>
+    <div class="dots-nav" id="dots-container"></div>
+    <button class="control-btn" id="btn-next" title="下一页 (→ / 空格 / PageDown)">▶</button>
+    <button class="control-btn" id="btn-fullscreen" title="全屏演示 (F)">⛶</button>
+    <button class="control-btn" id="btn-help" title="快捷键帮助 (?)">?</button>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="shortcuts-modal">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>快捷键与演示指南</span>
+        <span class="modal-close" id="modal-close">&times;</span>
+      </div>
+      <div class="shortcut-row">
+        <span>下一页 / 推进</span>
+        <span><kbd class="kbd-key">→</kbd> / <kbd class="kbd-key">Space</kbd> / <kbd class="kbd-key">PageDown</kbd></span>
+      </div>
+      <div class="shortcut-row">
+        <span>上一页 / 返回</span>
+        <span><kbd class="kbd-key">←</kbd> / <kbd class="kbd-key">PageUp</kbd></span>
+      </div>
+      <div class="shortcut-row">
+        <span>首页 / 尾页</span>
+        <span><kbd class="kbd-key">Home</kbd> / <kbd class="kbd-key">End</kbd></span>
+      </div>
+      <div class="shortcut-row">
+        <span>全屏演示切换</span>
+        <span><kbd class="kbd-key">F</kbd></span>
+      </div>
+      <div class="shortcut-row">
+        <span>直达指定页码</span>
+        <span><kbd class="kbd-key">1</kbd> ~ <kbd class="kbd-key">9</kbd></span>
+      </div>
+      <div class="shortcut-row">
+        <span>帮助弹窗切换</span>
+        <span><kbd class="kbd-key">?</kbd> 或 <kbd class="kbd-key">H</kbd></span>
+      </div>
+      <div class="shortcut-row" style="border: none; margin-top: 8px;">
+        <span style="color: var(--text-dim); font-size: 12px;">支持触控左右滑动与图片放大</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div id="img-lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="放大凭据">
+  </div>
+
+  <script>
+    // State
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+
+    // Elements
+    const counterEl = document.getElementById('slide-counter');
+    const progressBar = document.getElementById('top-progress');
+    const dotsContainer = document.getElementById('dots-container');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    const modal = document.getElementById('shortcuts-modal');
+    const lightbox = document.getElementById('img-lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+
+    // Create Navigation Dots
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('div');
+      dot.className = `dot-item ${idx === 0 ? 'active' : ''}`;
+      dot.title = `跳转到第 ${idx + 1} 页`;
+      dot.addEventListener('click', () => goToSlide(idx));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = Array.from(document.querySelectorAll('.dot-item'));
+
+    function updateDeck(newIdx) {
+      if (newIdx < 0 || newIdx >= totalSlides) return;
+      
+      slides[currentSlide].classList.remove('active');
+      dots[currentSlide].classList.remove('active');
+
+      currentSlide = newIdx;
+
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+
+      // Update counter
+      counterEl.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      
+      // Update top progress bar
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        updateDeck(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        updateDeck(currentSlide - 1);
+      }
+    }
+
+    function goToSlide(idx) {
+      updateDeck(idx);
+    }
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const root = document.documentElement;
+        if (root.requestFullscreen) {
+          root.requestFullscreen();
+        } else if (root.webkitRequestFullscreen) {
+          root.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    function onFullscreenChange() {
+      const isFull = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      btnFullscreen.innerHTML = isFull ? '🗗' : '⛶';
+      btnFullscreen.title = isFull ? '退出全屏 (F)' : '全屏演示 (F)';
+    }
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      // If modal or lightbox is open, ESC closes it
+      if (e.key === 'Escape') {
+        if (modal.style.display === 'flex') modal.style.display = 'none';
+        if (lightbox.style.display === 'flex') lightbox.style.display = 'none';
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+      } else if (e.key >= '1' && e.key <= '9') {
+        const num = parseInt(e.key, 10);
+        if (num <= totalSlides) {
+          goToSlide(num - 1);
+        }
+      }
+    });
+
+    // Touch Swipe
+    let touchStartX = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      if (touchEndX - touchStartX > 50) prevSlide();
+    }, { passive: true });
+
+    // Buttons
+    document.getElementById('btn-next').addEventListener('click', nextSlide);
+    document.getElementById('btn-prev').addEventListener('click', prevSlide);
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+
+    document.getElementById('btn-help').addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Lightbox Functionality
+    function openLightbox(src) {
+      lightboxImg.src = src;
+      lightbox.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      lightbox.style.display = 'none';
+    }
+
+    // Initialize
+    updateDeck(0);
+  </script>
+</body>
+</html>
